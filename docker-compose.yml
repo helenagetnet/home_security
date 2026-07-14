@@ -1,0 +1,53 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: home_mqtt_broker
+    ports:
+      - "1886:1883"
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: home_mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: home_security
+      MYSQL_USER: homeuser
+      MYSQL_PASSWORD: homepass
+    ports:
+      - "3311:3306"
+    volumes:
+      - ./database/mysql_schema.sql:/docker-entrypoint-initdb.d/mysql_schema.sql
+      - home_mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:7
+    container_name: home_mongodb_db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpass
+    ports:
+      - "27021:27017"
+    volumes:
+      - home_mongo_data:/data/db
+    restart: unless-stopped
+
+  neo4j:
+    image: neo4j:5
+    container_name: home_neo4j_db
+    environment:
+      NEO4J_AUTH: neo4j/password123
+    ports:
+      - "7477:7474"
+      - "7690:7687"
+    volumes:
+      - home_neo4j_data:/data
+    restart: unless-stopped
+
+volumes:
+  home_mysql_data:
+  home_mongo_data:
+  home_neo4j_data:
